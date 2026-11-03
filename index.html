@@ -373,8 +373,7 @@ async function showRecords() {
   const { data, error } = await db
     .from("scores")
     .select("player_name, score")
-    .order("score", { ascending: false })
-    .limit(25);
+    .order("score", { ascending: false });
 
   if (error) {
     list.innerHTML = "<li>Puanlar yüklenemedi.</li>";
