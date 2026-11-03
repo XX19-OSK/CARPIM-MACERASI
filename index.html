@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta charset="UTF-8">
 <title>Çarpım Tablosu Macerası</title>
 
@@ -202,6 +203,62 @@ button:hover {
 #result {
   font-size: 20px;
   margin: 20px;
+}
+/* TELEFON EKRANLARI İÇİN */
+* {
+    box-sizing: border-box;
+}
+
+@media screen and (max-width: 600px) {
+
+    body {
+        padding: 12px;
+    }
+
+    .game {
+        width: 100%;
+        max-width: 100%;
+        padding: 20px 14px;
+        margin: 10px auto;
+    }
+
+    h1 {
+        font-size: 25px;
+    }
+
+    h2 {
+        font-size: 21px;
+    }
+
+    p {
+        font-size: 16px;
+    }
+
+    input {
+        width: 100%;
+        max-width: 100%;
+        font-size: 18px;
+        padding: 12px;
+    }
+
+    button {
+        font-size: 17px;
+        padding: 12px 16px;
+        max-width: 100%;
+    }
+
+    #gameArea button {
+        min-width: 65px;
+        margin: 5px;
+    }
+
+    #question {
+        font-size: 27px;
+    }
+
+    #records {
+        font-size: 15px;
+    }
 }
 </style>
 </head>
