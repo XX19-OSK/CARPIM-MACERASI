@@ -1,0 +1,473 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Çarpım Tablosu Macerası</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: #e8f2ff;
+  text-align: center;
+  padding: 40px;
+}
+
+.sky {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    #f8dce5,
+    #e8f2ff
+  );
+  animation: skyChange 120s linear forwards;
+}
+
+@keyframes skyChange {
+
+  0% {
+    background: linear-gradient(to bottom, #f8dce5, #e8f2ff);
+  }
+
+  25% {
+    background: linear-gradient(to bottom, #b8dff5, #e5f3ff);
+  }
+
+  50% {
+    background: linear-gradient(to bottom, #65b8ed, #d5edff);
+  }
+
+  75% {
+    background: linear-gradient(to bottom, #f3a36e, #e9b4c9);
+  }
+
+  100% {
+    background: linear-gradient(to bottom, #171b48, #49365f);
+  }
+}
+.cloud {
+  position: fixed;
+  width: 130px;
+  height: 42px;
+  background: white;
+  border-radius: 50px;
+  opacity: 0.9;
+  z-index: 0;
+  pointer-events: none;
+  animation: bulutHareket 35s linear infinite;
+}
+
+.cloud::before {
+  content: "";
+  position: absolute;
+  width: 55px;
+  height: 55px;
+  background: white;
+  border-radius: 50%;
+  top: -27px;
+  left: 20px;
+}
+
+.cloud::after {
+  content: "";
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  background: white;
+  border-radius: 50%;
+  top: -38px;
+  left: 55px;
+}
+
+.cloud1 {
+  top: 12%;
+}
+
+.cloud2 {
+  top: 42%;
+  animation-duration: 50s;
+}
+
+.cloud3 {
+  top: 78%;
+  animation-duration: 42s;
+}
+
+@keyframes bulutHareket {
+  from { left: -180px; }
+  to { left: 110%; }
+}
+/* GÜNEŞ */
+
+
+/* GÜNEŞİN GÜNLÜK YOLCULUĞU */
+
+.sun {
+  position: fixed;
+  top: 75vh;
+  left: -45px;
+  width: 85px;
+  height: 85px;
+  background: #FFD54F;
+  border-radius: 50%;
+  box-shadow: 0 0 40px #FFEB3B;
+  z-index: 0;
+  pointer-events: none;
+
+  animation: gunesYolculugu 120s linear forwards;
+}
+
+@keyframes gunesYolculugu {
+
+  0% {
+    left: -45px;
+    top: 75vh;
+    transform: scale(0.7);
+  }
+
+  25% {
+    left: 20vw;
+    top: 35vh;
+    transform: scale(0.85);
+  }
+
+  50% {
+    left: calc(50vw - 42px);
+    top: 8vh;
+    transform: scale(1);
+  }
+
+  75% {
+    left: 75vw;
+    top: 35vh;
+    transform: scale(0.85);
+  }
+
+  100% {
+    left: calc(100vw - 40px);
+    top: 75vh;
+    transform: scale(0.7);
+  }
+
+}
+/* OYUN KUTUSU */
+
+.game {
+
+  position: relative;
+
+  z-index: 2;
+
+  background: white;
+
+  max-width: 400px;
+
+  margin: auto;
+
+  padding: 30px;
+
+  border-radius: 20px;
+
+}
+
+h1 {
+  color: #315b96;
+}
+
+#question {
+  font-size: 45px;
+  margin: 30px;
+}
+
+button {
+  background: #4779c7;
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  margin: 8px;
+  border-radius: 10px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #254b85;
+}
+
+#result {
+  font-size: 20px;
+  margin: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sky"></div>
+
+<div class="cloud cloud1"></div>
+
+<div class="cloud cloud2"></div>
+
+<div class="cloud cloud3"></div>
+
+<div class="sun"></div>
+
+
+<div class="game">
+
+<h1>🚀 Çarpım Macerası</h1>
+
+<p>Doğru cevabı bul!</p>
+
+<div id="login">
+  <h3>Oyuncu adın nedir?</h3>
+  <input type="text" id="playerName" placeholder="İsmini yaz">
+  <button onclick="startGame()">Oyuna Başla</button>
+</div>
+
+<div id="gameArea" style="display:none;">
+
+  <h2 id="welcome"></h2>
+
+  <div id="question">5 × 6 = ?</div>
+
+  <div id="answers"></div>
+
+  <div id="result">Haydi başlayalım!</div>
+
+  <p>⏳ Kalan süre: <span id="time">120</span> saniye</p>
+
+  <p>⭐ Puan: <span id="score">0</span></p>
+
+  <button onclick="startGame()">Yeni Oyun</button>
+
+</div>
+
+<div id="records">
+  <h3>🏆 En İyi Oyuncular</h3>
+  <ol id="recordList"></ol>
+</div>
+
+</div>
+
+<script>
+
+
+let score = 0;
+let correctAnswer;
+let timeLeft = 120;
+let gameEnded = true;
+let questionAnswered = false;
+let timer = null;
+let nextQuestionTimer = null;
+let playerName = "";
+
+const RECORD_KEY = "carpimMacerasıRekorlari";
+
+// Kayıtları bilgisayarın tarayıcısından oku
+function getRecords() {
+  return JSON.parse(localStorage.getItem(RECORD_KEY) || "[]");
+}
+
+// Rekor listesini ekranda göster
+function showRecords() {
+  let records = getRecords();
+
+  let list = document.getElementById("recordList");
+  list.innerHTML = "";
+
+  records.forEach(record => {
+    let item = document.createElement("li");
+    item.innerText = record.name + " — " + record.score + " puan";
+    list.appendChild(item);
+  });
+
+  if (records.length === 0) {
+    list.innerHTML = "<li>Henüz rekor yok. İlk rekor senin olsun!</li>";
+  }
+}
+
+// Oyuncunun rekorunu kaydet
+function saveRecord() {
+
+  let records = getRecords();
+
+  let existing = records.find(
+    record => record.name.toLowerCase() === playerName.toLowerCase()
+  );
+
+  if (existing) {
+
+    existing.score = score;
+
+  } else {
+
+    records.push({
+      name: playerName,
+      score: score
+    });
+
+  }
+
+  // Puanları büyükten küçüğe sırala
+  records.sort((a, b) => b.score - a.score);
+
+  // İlk 10 oyuncuyu tut
+  records = records.slice(0, 10);
+
+  // Kayıtları sakla
+  localStorage.setItem(RECORD_KEY, JSON.stringify(records));
+
+  showRecords();
+}
+// Oyunu başlat
+function startGame() {
+
+  let nameInput = document.getElementById("playerName");
+
+  if (!nameInput.value.trim()) {
+    alert("Önce oyuncu adını yazmalısın!");
+    return;
+  }
+
+  playerName = nameInput.value.trim();
+
+  clearInterval(timer);
+  clearTimeout(nextQuestionTimer);
+
+  score = 0;
+  timeLeft = 120;
+  gameEnded = false;
+
+  document.getElementById("login").style.display = "none";
+  document.getElementById("gameArea").style.display = "block";
+
+  document.getElementById("welcome").innerText =
+    "Merhaba " + playerName + "! Başarılar!";
+
+  document.getElementById("score").innerText = score;
+  document.getElementById("time").innerText = timeLeft;
+  document.getElementById("result").innerText = "Haydi başlayalım!";
+
+  newQuestion();
+
+  timer = setInterval(function() {
+
+    timeLeft--;
+
+    document.getElementById("time").innerText = timeLeft;
+
+    if (timeLeft <= 0) {
+      endGame();
+    }
+
+  }, 1000);
+}
+
+// Yeni soru oluştur
+function newQuestion() {
+
+  if (gameEnded) return;
+
+  questionAnswered = false;
+
+  let a = Math.floor(Math.random() * 9) + 2;
+  let b = Math.floor(Math.random() * 9) + 2;
+
+  correctAnswer = a * b;
+
+  document.getElementById("question").innerText =
+    a + " × " + b + " = ?";
+
+  let answers = [correctAnswer];
+
+  while (answers.length < 4) {
+    let wrong = Math.floor(Math.random() * 81) + 4;
+
+    if (!answers.includes(wrong)) {
+      answers.push(wrong);
+    }
+  }
+
+  answers.sort(() => Math.random() - 0.5);
+
+  let area = document.getElementById("answers");
+  area.innerHTML = "";
+
+  answers.forEach(answer => {
+
+    let btn = document.createElement("button");
+    btn.innerText = answer;
+
+    btn.onclick = function() {
+      checkAnswer(answer);
+    };
+
+    area.appendChild(btn);
+
+  });
+}
+
+// Cevabı kontrol et
+function checkAnswer(answer) {
+
+  if (gameEnded || questionAnswered) return;
+
+  if (answer === correctAnswer) {
+
+    questionAnswered = true;
+    score += 10;
+
+    document.getElementById("result").innerText =
+      "🎉 Harika! Doğru cevap!";
+
+    document.getElementById("score").innerText = score;
+
+    document.querySelectorAll("#answers button")
+      .forEach(btn => btn.disabled = true);
+
+    nextQuestionTimer = setTimeout(newQuestion, 1000);
+
+  } else {
+
+  score -= 5;
+
+  document.getElementById("score").innerText = score;
+
+  document.getElementById("result").innerText =
+    "🙃 Yanlış cevap! 5 puan kaybettin.";
+
+}
+}
+// Süre bitince oyunu bitir
+function endGame() {
+
+  if (gameEnded) return;
+
+  gameEnded = true;
+
+  clearInterval(timer);
+  clearTimeout(nextQuestionTimer);
+
+  document.getElementById("result").innerText =
+    "🌅 Güneş battı! Oyun bitti! " +
+    playerName + ", puanın: " + score;
+
+  document.querySelectorAll("#answers button")
+    .forEach(btn => btn.disabled = true);
+
+  saveRecord();
+}
+
+// Sayfa açılınca eski rekorları göster
+showRecords();
+
+
+</script>
+
+</body>
+</html>
