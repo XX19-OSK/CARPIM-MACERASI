@@ -345,9 +345,15 @@ button:hover {
 </div>
 
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL = "https://oqrogehrjfuixhxbzclg.supabase.co";
+const SUPABASE_KEY = "sb_publishable_9DWOrTrF2Ri-j4Hkaly3rg_sCgmTwun";
 
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
 let score = 0;
 let correctAnswer;
@@ -360,61 +366,50 @@ let playerName = "";
 
 const RECORD_KEY = "carpimMacerasıRekorlari";
 
-// Kayıtları bilgisayarın tarayıcısından oku
-function getRecords() {
-  return JSON.parse(localStorage.getItem(RECORD_KEY) || "[]");
-}
+async function showRecords() {
+  const list = document.getElementById("recordList");
+  list.innerHTML = "<li>Yükleniyor...</li>";
 
-// Rekor listesini ekranda göster
-function showRecords() {
-  let records = getRecords();
+  const { data, error } = await db
+    .from("scores")
+    .select("player_name, score")
+    .order("score", { ascending: false })
+    .limit(25);
 
-  let list = document.getElementById("recordList");
+  if (error) {
+    list.innerHTML = "<li>Puanlar yüklenemedi.</li>";
+    console.error(error);
+    return;
+  }
+
   list.innerHTML = "";
 
-  records.forEach(record => {
-    let item = document.createElement("li");
-    item.innerText = record.name + " — " + record.score + " puan";
+  if (!data || data.length === 0) {
+    list.innerHTML = "<li>İlk rekor senin olsun!</li>";
+    return;
+  }
+
+  data.forEach((record) => {
+    const item = document.createElement("li");
+    item.innerText = record.player_name + " — " + record.score + " puan";
     list.appendChild(item);
   });
-
-  if (records.length === 0) {
-    list.innerHTML = "<li>Henüz rekor yok. İlk rekor senin olsun!</li>";
-  }
 }
-
-// Oyuncunun rekorunu kaydet
-function saveRecord() {
-
-  let records = getRecords();
-
-  let existing = records.find(
-    record => record.name.toLowerCase() === playerName.toLowerCase()
-  );
-
-  if (existing) {
-
-    existing.score = score;
-
-  } else {
-
-    records.push({
-      name: playerName,
+async function saveRecord() {
+  const { error } = await db
+    .from("scores")
+    .insert({
+      player_name: playerName,
       score: score
     });
 
+  if (error) {
+    console.error("Puan kaydedilemedi:", error);
+    alert("Puan kaydedilemedi.");
+    return;
   }
 
-  // Puanları büyükten küçüğe sırala
-  records.sort((a, b) => b.score - a.score);
-
-  // İlk 10 oyuncuyu tut
-  records = records.slice(0, 10);
-
-  // Kayıtları sakla
-  localStorage.setItem(RECORD_KEY, JSON.stringify(records));
-
-  showRecords();
+  await showRecords();
 }
 // Oyunu başlat
 function startGame() {
