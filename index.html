@@ -23,7 +23,8 @@ body {
     #f8dce5,
     #e8f2ff
   );
-  animation: skyChange 120s linear forwards;
+animation: skyChange 120s linear forwards;
+animation-play-state: paused;
 }
 
 @keyframes skyChange {
@@ -118,6 +119,7 @@ body {
   pointer-events: none;
 
   animation: gunesYolculugu 120s linear forwards;
+animation-play-state: paused;
 }
 
 @keyframes gunesYolculugu {
@@ -342,6 +344,17 @@ function startGame() {
   score = 0;
   timeLeft = 120;
   gameEnded = false;
+// Güneş ve gökyüzü animasyonlarını baştan başlat
+document.querySelector(".sun").style.animation = "none";
+document.querySelector(".sky").style.animation = "none";
+
+void document.querySelector(".sun").offsetWidth;
+
+document.querySelector(".sun").style.animation =
+  "gunesYolculugu 120s linear forwards";
+
+document.querySelector(".sky").style.animation =
+  "skyChange 120s linear forwards";
 
   document.getElementById("login").style.display = "none";
   document.getElementById("gameArea").style.display = "block";
